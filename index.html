@@ -1,0 +1,416 @@
+<title>健檢立體書</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：左邊是一本會立起來的立體書（每一頁一個房間，立牌＝重點），右邊是一張大字紙卡；單一紙感外觀，不分深淺色 */
+:root{
+  color-scheme:light;
+  --paper:#f1efe9; --sheet:#fbfaf6; --ink:#2b22d6; --ink-2:rgba(43,34,214,.14); --text:#1c1947; --mute:#5d5a80;
+  --lilac:#ddd7f4; --pink:#f6d3da; --butter:#f6e8bb; --sky:#d2e4f5; --red:#d3304a;
+  --hand:"LXGW WenKai TC","Kaiti TC","DFKai-SB",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --S:320px; --H:200px;
+  --fs:clamp(16px,min(1.5vw,2.75vh),30px);
+}
+html,body{height:100%}
+body{background:var(--paper);color:var(--text);font-family:var(--body);font-size:var(--fs);line-height:1.5;overflow:hidden;
+  background-image:radial-gradient(ellipse at 50% 40%,#f7f6f1 0%,var(--paper) 70%)}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+svg.defs{position:absolute;width:0;height:0}
+
+.app{height:100%;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,43fr) minmax(0,57fr);gap:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+
+/* ---------- 左：立體書 ---------- */
+.stage{position:relative;min-width:0;min-height:0;display:flex;flex-direction:column}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;z-index:3}
+.tab{font-family:var(--hand);font-weight:700;font-size:.78em;padding:.28em .7em;border:2px solid var(--ink);border-radius:12px 14px 4px 4px/14px 12px 4px 4px;color:var(--ink);background:var(--sheet)}
+.tab[aria-current="true"]{background:var(--ink);color:#fff}
+.scene{position:relative;flex:1;min-height:0;overflow:hidden}
+.book{position:absolute;left:50%;top:50%;width:var(--S);height:var(--S);margin:calc(var(--S)/-2) 0 0 calc(var(--S)/-2);
+  transform:translateY(calc(var(--k,1)*78px)) scale(var(--k,1)) rotateX(57deg) rotateZ(45deg);transform-style:preserve-3d}
+.book *{box-sizing:border-box}
+#pages,#standees{position:absolute;inset:0;transform-style:preserve-3d;pointer-events:none}
+#pages>*,#standees>*{pointer-events:auto}
+.shadow{position:absolute;inset:-40px -40px -70px -70px;background:radial-gradient(closest-side,rgba(40,36,90,.28),rgba(40,36,90,0) 100%);transform:translateZ(-3px)}
+.floor{position:absolute;inset:0;border:3px solid var(--ink);background-color:var(--room,var(--lilac));
+  background-image:repeating-linear-gradient(0deg,var(--ink-2) 0 1.5px,transparent 1.5px 40px),repeating-linear-gradient(90deg,var(--ink-2) 0 1.5px,transparent 1.5px 40px);transition:background-color .6s}
+.wall{position:absolute;border:3px solid var(--ink);background-color:#f8f7fb;
+  background-image:repeating-linear-gradient(135deg,rgba(43,34,214,.07) 0 1.5px,transparent 1.5px 9px);transition:transform .9s cubic-bezier(.3,1.35,.5,1)}
+.wr{left:0;top:calc(-1*var(--H));width:var(--S);height:var(--H);transform-origin:50% 100%;transform:rotateX(-90deg)}
+.wl{left:calc(-1*var(--H));top:0;width:var(--H);height:var(--S);transform-origin:100% 50%;transform:rotateY(90deg)}
+.book.closed .wr{transform:rotateX(-177deg)}
+.book.closed .wl{transform:rotateY(177deg)}
+.wl .wface{position:absolute;left:50%;top:50%;width:var(--S);height:var(--H);margin:calc(var(--H)/-2) 0 0 calc(var(--S)/-2);transform:rotate(-90deg)}
+.wr .wface{position:absolute;inset:0}
+.wface{transition:opacity .3s}
+.book.folded .wface{opacity:0}
+.wface svg{width:100%;height:100%;display:block}
+.poster{position:absolute;left:34px;top:22px;right:34px;bottom:26px;border:2.5px solid var(--ink);background:var(--sheet);border-radius:6px 9px 5px 8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:var(--hand);color:var(--ink);text-align:center;cursor:pointer}
+.poster small{font-size:17px}
+.poster b{font-size:50px;line-height:1.1}
+.poster span{font-size:20px;color:var(--text)}
+.poster::before{content:"";position:absolute;top:-10px;left:50%;width:64px;height:18px;margin-left:-32px;background:var(--butter);border:2px solid var(--ink);transform:rotate(-3deg)}
+.pw{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;transform:rotateZ(var(--a));transition:transform .85s cubic-bezier(.45,0,.3,1)}
+.pg{position:absolute;left:0;top:calc(-1*var(--H));width:var(--S);height:var(--H);transform-origin:50% 100%;transform:rotateX(-90deg);border:2.5px solid var(--ink);
+  background-color:rgba(246,245,250,.93);background-image:repeating-linear-gradient(135deg,rgba(43,34,214,.16) 0 1.5px,transparent 1.5px 6px)}
+.standee{position:absolute;left:var(--x);top:var(--y);width:88px;height:112px;margin:-112px 0 0 -44px;transform-origin:50% 100%;
+  transform:translateZ(1px) rotateZ(-45deg) rotateX(-90deg);transition:transform .65s cubic-bezier(.3,1.6,.5,1);transition-delay:calc(var(--i)*80ms + 250ms)}
+.book.folded .standee,.book.closed .standee{transform:translateZ(1px) rotateZ(-45deg) rotateX(-3deg);transition:transform .28s ease-in;transition-delay:0s}
+.sign{position:absolute;left:0;right:0;top:0;height:94px;border:3px solid var(--ink);border-radius:16px 20px 14px 18px/18px 14px 20px 16px;background:var(--sheet);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--hand);color:var(--ink);transition:transform .25s,background-color .25s;box-shadow:0 0 0 3px rgba(255,255,255,.9)}
+.sign b{font-size:40px;line-height:1.05}
+.sign span{font-size:15px;line-height:1.15;color:var(--text);font-weight:700;white-space:nowrap}
+.standee::after{content:"";position:absolute;left:50%;bottom:0;width:12px;height:20px;margin-left:-6px;background:var(--sheet);border:3px solid var(--ink);border-top:0}
+.standee.seen .sign{background:var(--sky)}
+.standee.on .sign{background:var(--butter);transform:translateY(-10px) rotate(-2deg)}
+.standee:hover .sign{transform:translateY(-6px)}
+
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:3;padding-bottom:4px}
+.arrow{width:clamp(56px,6vw,92px);height:clamp(44px,4.6vw,64px);color:var(--ink);flex:none}
+.arrow svg{width:100%;height:100%}
+.arrow:disabled{opacity:.25;cursor:default}
+.room{flex:1;min-width:0;text-align:center;font-family:var(--hand);font-weight:700;color:var(--ink);font-size:clamp(24px,2.6vw,44px);line-height:1.1}
+.room small{display:block;font-size:.5em;color:var(--mute);font-weight:400;margin-top:.2em}
+
+/* ---------- 右：紙卡 ---------- */
+.sheet{position:relative;min-width:0;min-height:0;margin-left:clamp(8px,1.4vw,24px);background:var(--sheet);border-radius:18px;display:flex;flex-direction:column;
+  padding:clamp(16px,2.2vw,36px);gap:clamp(10px,1.6vh,20px);box-shadow:0 14px 40px -22px rgba(30,26,90,.5)}
+.sheet::before{content:"";position:absolute;inset:0;border:3px solid var(--ink);border-radius:18px 26px 20px 30px/28px 18px 30px 20px;filter:url(#wob);pointer-events:none}
+.kick{display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--hand);color:var(--ink);font-size:.9em}
+.pips{display:flex;gap:7px}
+.pip{width:1.05em;height:1.05em;border:2px solid var(--ink);border-radius:50%}
+.pip[aria-current="true"]{background:var(--ink)}
+.tools{display:flex;gap:8px}
+.tool{font-family:var(--hand);font-size:.82em;border:2px solid var(--ink);border-radius:999px;padding:.1em .7em;color:var(--ink)}
+h1.h{font-family:var(--hand);font-weight:700;font-size:clamp(26px,min(3.2vw,6vh),60px);line-height:1.18;color:var(--ink);margin:0;text-wrap:balance}
+.bodyx{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(10px,1.8vh,22px);overflow-y:auto;animation:in .35s ease}
+@keyframes in{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}
+.lead{margin:0;font-size:1.22em;font-weight:500;line-height:1.45;text-wrap:balance}
+.lead em,.tile em,.cmp em{font-style:normal;background:linear-gradient(transparent 58%,var(--butter) 58%)}
+.tiles{flex:1;display:grid;gap:clamp(8px,1.2vw,16px);grid-auto-rows:1fr;grid-template-columns:repeat(var(--c,2),minmax(0,1fr))}
+.tile{border:2.5px solid var(--ink);border-radius:14px 18px 12px 16px/16px 12px 18px 14px;padding:.7em .85em;display:flex;flex-direction:column;justify-content:center;gap:.25em;background:#fff;min-width:0}
+.tile:nth-child(4n+1){background:var(--lilac)}.tile:nth-child(4n+2){background:var(--sky)}.tile:nth-child(4n+3){background:var(--butter)}.tile:nth-child(4n+4){background:var(--pink)}
+.tile b{font-family:var(--hand);font-size:1.45em;line-height:1.15;color:var(--ink)}
+.tile.num b{font-size:2.3em}
+.tile span{line-height:1.45}
+.flow{flex:1;display:grid;grid-template-columns:repeat(var(--c,4),minmax(0,1fr));gap:.4em;align-items:stretch}
+.flow .tile{position:relative;text-align:center;align-items:center}
+.flow .tile i{font-style:normal;font-family:var(--hand);color:var(--mute);font-size:.85em}
+.tri{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,1vw,14px)}
+.col{border:2.5px solid var(--ink);border-radius:14px 18px 12px 16px/16px 12px 18px 14px;padding:.6em .8em;display:flex;flex-direction:column;min-width:0;background:#fff}
+.col h3{margin:0 0 .3em;font-family:var(--hand);font-size:1.2em;color:var(--ink);border-bottom:2px dashed var(--ink);padding-bottom:.2em}
+.col.red{background:#fdeef0;border-color:var(--red)} .col.red h3{color:var(--red);border-color:var(--red)}
+.col.life{background:var(--sky)}
+.col ul{margin:0;padding:0;list-style:none;flex:1;display:flex;flex-direction:column;justify-content:space-evenly;gap:.35em}
+.col li{padding-left:1em;position:relative;line-height:1.4}
+.col li::before{content:"";position:absolute;left:0;top:.55em;width:.45em;height:.45em;border-radius:50%;background:currentColor;opacity:.55}
+table.cmp{flex:1;width:100%;border-collapse:separate;border-spacing:0;border:2.5px solid var(--ink);border-radius:14px;overflow:hidden;background:#fff;table-layout:fixed}
+.cmp th,.cmp td{padding:.5em .7em;border-bottom:2px dashed var(--ink-2);vertical-align:middle;text-align:left;line-height:1.4}
+.cmp tr:last-child td,.cmp tr:last-child th{border-bottom:0}
+.cmp thead th{font-family:var(--hand);font-size:1.2em;color:var(--ink);background:var(--lilac);border-bottom:2.5px solid var(--ink)}
+.cmp tbody th{font-family:var(--hand);color:var(--ink);width:6.2em;background:var(--butter)}
+.cmp td.both{text-align:center;background:var(--sky)}
+.note{margin:0;font-size:.86em;color:var(--mute);line-height:1.45}
+.warn{margin:0;border:2.5px solid var(--red);border-radius:12px;padding:.5em .8em;background:#fdeef0;line-height:1.45}
+.ask{font-family:var(--hand);font-size:1.05em;background:var(--butter);border-radius:10px;padding:.45em .8em;line-height:1.35;display:flex;gap:.6em;align-items:baseline}
+.ask b{color:var(--ink);white-space:nowrap}
+.src{font-size:.62em;color:var(--mute);line-height:1.3}
+.stairs{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:0}
+.stair{border:2.5px solid var(--ink);padding:.6em .7em;display:flex;flex-direction:column;justify-content:center;text-align:center;background:var(--sky);border-radius:12px 12px 0 0}
+.stair:nth-child(1){height:46%;background:var(--lilac)}.stair:nth-child(2){height:72%;margin-left:-2.5px}.stair:nth-child(3){height:100%;margin-left:-2.5px;background:var(--butter)}
+.stair b{font-family:var(--hand);font-size:1.5em;color:var(--ink);line-height:1.15}.stair span{font-size:1.25em;font-weight:700}
+/* 迷思 */
+.myth{flex:1;display:flex;flex-direction:column;gap:clamp(10px,1.6vh,18px);min-height:0}
+.say{font-family:var(--hand);font-size:1.75em;line-height:1.4;border:2.5px solid var(--ink);border-radius:26px 30px 28px 6px;padding:.6em .8em;background:var(--pink);flex:1;display:flex;align-items:center;transition:font-size .3s}
+.flip{align-self:center;font-family:var(--hand);font-weight:700;font-size:1.3em;background:var(--ink);color:#fff;border-radius:999px;padding:.35em 1.4em}
+.myth.open .say{flex:none;font-size:.92em;line-height:1.3;text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px;padding:.35em .7em}
+.myth.open .flip{display:none}
+.truth{flex:1;display:flex;flex-direction:column;gap:clamp(8px,1.4vh,16px);min-height:0}
+.bubbles{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(8px,1vw,14px);grid-auto-rows:1fr}
+.bubble{font-family:var(--hand);font-size:1.12em;text-align:left;line-height:1.35;border:2.5px solid var(--ink);border-radius:22px 26px 24px 6px;padding:.5em .8em;background:#fff;display:flex;align-items:center}
+.bubble:nth-child(odd){background:var(--pink)} .bubble:nth-child(even){background:var(--lilac);border-radius:26px 22px 6px 24px}
+/* 資格查詢 */
+.elig{flex:1;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(10px,1.2vw,18px);min-height:0}
+.ctl{display:flex;flex-direction:column;gap:.6em;justify-content:space-between}
+.ctl h3,.out h3{margin:0;font-family:var(--hand);color:var(--ink);font-size:1.1em}
+.age{display:flex;align-items:center;justify-content:space-between;gap:.3em;border:2.5px solid var(--ink);border-radius:14px;padding:.3em;background:#fff}
+.age output{font-family:var(--hand);font-weight:700;font-size:2em;color:var(--ink);line-height:1;flex:1;text-align:center}
+.age button{font-family:var(--hand);font-weight:700;font-size:.95em;border:2px solid var(--ink);border-radius:10px;padding:.25em .3em;background:var(--lilac);flex:none}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:.4em}
+.chip{border:2.5px solid var(--ink);border-radius:12px;padding:.4em .6em;background:#fff;text-align:left;line-height:1.3}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff}
+.out{border:2.5px solid var(--ink);border-radius:16px;background:var(--sky);padding:.6em .8em;display:flex;flex-direction:column;gap:.4em;min-height:0;overflow-y:auto}
+.out ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.3em;flex:1;justify-content:space-evenly}
+.out li{background:#fff;border-radius:10px;padding:.3em .6em;line-height:1.35;display:flex;gap:.5em;justify-content:space-between;align-items:baseline}
+.out li b{color:var(--ink);font-family:var(--hand);white-space:nowrap}
+.out li span{font-size:.88em;color:var(--mute);text-align:right}
+.pledge{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--hand);font-size:2em;line-height:1.9;border:2.5px dashed var(--ink);border-radius:20px;background:var(--butter);padding:.5em}
+.pledge u{text-decoration:none;display:inline-block;min-width:2.6em;border-bottom:3px solid var(--ink)}
+
+/* ---------- 封面 ---------- */
+.cover{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;perspective:1600px;
+  background:radial-gradient(ellipse at 50% 40%,#f7f6f1 0%,var(--paper) 70%);padding:max(16px,env(safe-area-inset-top,0px)) 16px 16px;transition:opacity .5s .35s,visibility 0s .9s}
+.cover.gone{opacity:0;visibility:hidden;pointer-events:none}
+.cv{position:relative;width:min(90vw,calc(84vh*1.3),980px);aspect-ratio:1.3;max-width:100%;transform:rotate(-3deg);transform-origin:0 50%;transition:transform .8s cubic-bezier(.5,0,.3,1);
+  background-color:#f8f7fb;background-image:repeating-linear-gradient(135deg,rgba(43,34,214,.09) 0 1.5px,transparent 1.5px 9px);border-radius:8px 22px 22px 8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:4.5% 7% 4.5% 11%;text-align:center;font-family:var(--hand);color:var(--ink);box-shadow:16px 22px 40px -18px rgba(30,26,90,.5)}
+.cover.gone .cv{transform:rotate(-3deg) rotateY(-105deg)}
+.cv::before{content:"";position:absolute;inset:0;border:4px solid var(--ink);border-radius:8px 22px 22px 8px;filter:url(#wob)}
+.cv::after{content:"";position:absolute;left:5.5%;top:0;bottom:0;border-left:3px dashed var(--ink)}
+.cv small{font-size:clamp(14px,min(2.2vw,3vh),26px);letter-spacing:.2em}
+.cv h2{margin:0;font-size:clamp(32px,min(7.4vw,11vh),104px);line-height:1.1;font-weight:700}
+.cv h2 br{display:none}
+.cv p{margin:0;font-size:clamp(15px,min(2.2vw,3.2vh),28px);color:var(--text);line-height:1.45}
+.cv svg{height:30%;width:auto}
+.cv .go{font-size:clamp(18px,3vh,30px);font-weight:700;background:var(--ink);color:#fff;border-radius:999px;padding:.3em 1.3em;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(-5px)}}
+
+@media (max-width:820px){
+  :root{--fs:clamp(15px,4vw,19px)}
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,41fr) minmax(0,59fr);gap:8px;padding-block:8px}
+  .sheet{margin-left:0;padding:14px}
+  .tab{font-size:.7em;padding:.2em .5em}
+  .tri,.elig{grid-template-columns:minmax(0,1fr)}
+  .tiles,.bubbles{--c:1!important;grid-template-columns:minmax(0,1fr);grid-auto-rows:auto}
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .say{font-size:1.3em}.pledge{font-size:1.4em}
+  .tools{display:none}
+  .cv{width:min(88vw,calc(84vh*.78));aspect-ratio:.78;padding:8% 8% 7% 13%}
+  .cv h2{font-size:clamp(34px,11vw,64px)} .cv h2 br{display:inline}
+  .cv svg{height:auto;width:66%}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation:none!important}}
+</style>
+
+<svg class="defs" aria-hidden="true"><defs>
+  <filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
+</defs></svg>
+
+<div class="cover" id="cover">
+  <button class="cv" id="openBtn" aria-label="翻開立體書">
+    <small>社區共讀・成人健康檢查</small>
+    <h2>翻開健康<br>這本書</h2>
+    <svg viewBox="0 0 300 190" fill="none" stroke="#2b22d6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+      <path d="M150 178 L40 122 L40 40 L150 86 Z" fill="#ddd7f4"/><path d="M150 178 L260 122 L260 40 L150 86 Z" fill="#d2e4f5"/>
+      <path d="M150 86 L150 178"/><path d="M40 40 L150 8 L260 40" /><path d="M150 8 L150 86"/>
+      <path d="M70 72 L112 90 L112 128 L70 110 Z" fill="#fbfaf6"/><path d="M91 81 L91 119 M70 91 L112 109"/>
+      <path d="M196 82 q10 -14 20 0 q10 -14 20 0 q0 16 -20 30 q-20 -14 -20 -30 Z" fill="#f6d3da"/>
+      <path d="M176 150 l14 -7 M212 132 l14 -7 M194 141 l14 -7" />
+    </svg>
+    <p>六頁立體書，一頁一個房間。<br>點房間裡的小立牌，看一張重點卡。</p>
+    <span class="go">點一下，翻開</span>
+  </button>
+</div>
+
+<div class="app">
+  <section class="stage" aria-label="立體書">
+    <nav class="tabs" id="tabs" aria-label="頁次"></nav>
+    <div class="scene" id="scene">
+      <div class="book closed folded" id="book">
+        <div class="shadow"></div>
+        <div id="pages"></div>
+        <div class="floor"></div>
+        <div class="wall wr"><div class="wface" id="wr"></div></div>
+        <div class="wall wl"><div class="wface" id="wl"></div></div>
+        <div id="standees"></div>
+      </div>
+    </div>
+    <div class="bar">
+      <button class="arrow" id="prev" aria-label="上一張"><svg viewBox="0 0 92 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M84 33 C62 30 38 35 10 32 M30 14 C24 22 16 28 9 32 C17 37 24 43 31 52"/></svg></button>
+      <div class="room" id="room"></div>
+      <button class="arrow" id="next" aria-label="下一張"><svg viewBox="0 0 92 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 33 C30 30 54 35 82 32 M62 14 C68 22 76 28 83 32 C75 37 68 43 61 52"/></svg></button>
+    </div>
+  </section>
+
+  <article class="sheet" id="sheet" aria-live="polite">
+    <div class="kick"><span id="kick"></span><span class="pips" id="pips"></span><span class="tools"><button class="tool" id="home">封面</button><button class="tool" id="full">全螢幕</button></span></div>
+    <h1 class="h" id="h"></h1>
+    <div class="bodyx" id="body"></div>
+    <div class="ask" id="ask"></div>
+    <div class="src" id="src"></div>
+  </article>
+</div>
+
+<script>
+/* ---------- 內容 ---------- */
+const T=(a,c=2,cls='')=>`<div class="tiles" style="--c:${c}">${a.map(([h,p])=>`<div class="tile ${cls}"><b>${h}</b><span>${p}</span></div>`).join('')}</div>`;
+const F=(a)=>`<div class="flow" style="--c:${a.length}">${a.map(([h,p],i)=>`<div class="tile"><i>${i+1}</i><b>${h}</b><span>${p}</span></div>`).join('')}</div>`;
+const L=s=>`<p class="lead">${s}</p>`;
+const U=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+const TRI=(a,b,c)=>`<div class="tri"><div class="col"><h3>報告怎麼看</h3>${U(a)}</div><div class="col red"><h3>紅字代表什麼</h3>${U(b)}</div><div class="col life"><h3>生活這樣調</h3>${U(c)}</div></div>`;
+const M=(say,truth,tiles)=>`<div class="myth"><div class="say">「${say}」</div><button class="flip" id="flip">翻開真相</button><div class="truth" hidden>${L(truth)}${T(tiles,tiles.length>3?2:tiles.length)}</div></div>`;
+const REF='參考值以你手上的報告為準，各檢驗單位略有不同。';
+const HPA='資料：國民健康署公費癌症篩檢（114 年擴大、115 年新增胃癌）';
+
+const CH=[
+{room:'客廳',title:'為什麼要健檢',color:'var(--lilac)',cards:[
+ {h:'身體沒有不舒服，為什麼還要去檢查？',b:L('健康檢查不是找麻煩，是替身體做一次<em>盤點</em>。')+T([['知道','哪裡開始走樣，心裡有數'],['提早','趁問題還小、還輕的時候處理'],['守住','不失能、不失智，自己的生活自己顧']],3),ask:'上一次抽血檢查是什麼時候？請大家說說看。'},
+ {k:'靜',s:'沒感覺',h:'沒感覺，不等於沒問題',b:L('高血壓、高血糖、高血脂、腎臟病，<em>早期幾乎都沒有症狀</em>。30 多歲的人裡面：')+T([['9.7%','已經有高血壓'],['18.7%','已經有高血脂'],['2.5%','已經有高血糖'],['越老越多','所以 65 歲以上，政府讓你每年檢查一次']],2,'num'),ask:'身邊有人「突然」中風或洗腎嗎？其實多半不是突然。',src:'資料：國民健康署 2019–2023 國民營養健康調查'},
+ {k:'早',s:'早處理',h:'早一步知道，少走很多路',b:L('同一個紅字，越早處理，越靠左邊就能停下來。')+F([['紅字出現','調整飲食和運動，花的是小力氣'],['放著不管','開始要靠藥物控制'],['再拖下去','中風、心臟病、洗腎'],['最後','失能，生活要靠別人照顧']]),ask:'如果可以選，你想在第幾格就停下來？'},
+ {k:'能',s:'不失能',h:'目標是：老了還能自己來',b:L('國人平均有 <em>7 到 8 年</em>，是在不健康、需要人照顧的狀態中度過。')+T([['防失能','控制三高，中風和心臟病的機會就下降'],['防失智','高血壓、糖尿病、高血脂、肥胖、聽力變差，都是可以處理的失智風險'],['防衰弱','體重、腰圍、營養和肌力，檢查時一起看']],3),ask:'你最想保住的能力是什麼？走路、記性，還是自己煮飯？',src:'資料：衛福部健康平均餘命統計；Lancet 失智症預防報告 2024（14 項可改變的風險，約占 45%）'},
+ {k:'賺',s:'四個理由',h:'再給你四個理由',b:T([['免費','政府已經幫你付了，放著不用很可惜'],['有得比','留下每次的數字，才看得出身體往哪邊走'],['家人安心','把自己顧好，就是給孩子最大的幫忙'],['有人解說','醫師會看著報告，告訴你下一步怎麼做']]),ask:'哪一個理由最打動你？'}
+]},
+{room:'服務台',title:'誰出錢？兩種健檢',color:'var(--butter)',cards:[
+ {h:'健檢的錢，誰幫你出？',b:L('台灣有兩套常見的健康檢查。<em>出錢的人不同，目的也不同</em>。')+T([['成人預防保健','國民健康署出錢。30 歲起就能做，目的是及早發現慢性病。'],['勞工健康檢查','雇主出錢。有受僱工作就有，目的是確認能安全工作。']]),ask:'還在上班的請舉手。已經退休的請舉手。'},
+ {k:'齡',s:'幾歲幾次',h:'成人健檢：年紀越大，次數越密',b:`<div class="stairs"><div class="stair"><b>30–39 歲</b><span>每 5 年 1 次</span></div><div class="stair"><b>40–64 歲</b><span>每 3 年 1 次</span></div><div class="stair"><b>65 歲以上</b><span>每年 1 次</span></div></div><p class="note">55 歲以上原住民、35 歲以上小兒麻痺患者：每年 1 次。帶健保卡到健保特約的診所、醫院或衛生所，檢查免費，可能要付掛號費。</p>`,ask:'算算看：你現在幾年可以做一次？',src:'資料：國民健康署成人預防保健服務（114 年起下修至 30 歲）'},
+ {k:'工',s:'勞工健檢',h:'勞工健檢：老闆的責任',b:T([['法律規定','職業安全衛生法第 20 條：雇主出錢，勞工有義務接受'],['現在多久一次','65 歲以上每年；40–64 歲每 3 年；未滿 40 歲每 5 年'],['117 年起更密','60 歲以上每年；40–59 歲每 2 年；未滿 40 歲每 3 年'],['特殊作業','噪音、粉塵、化學品等工作，另外有每年的特殊健檢']]),ask:'家裡還在工作的孩子，公司有沒有照規定做？',src:'資料：勞工健康保護規則第 17 條（115 年 6 月修正，新頻率 117 年 1 月 1 日施行）'},
+ {k:'比',s:'差在哪裡',h:'兩種健檢，差在哪裡？',b:`<table class="cmp"><thead><tr><th></th><th>成人預防保健</th><th>勞工一般健檢</th></tr></thead><tbody>
+ <tr><th>目的</th><td>及早發現慢性病</td><td>確認能安全工作、預防職業病</td></tr>
+ <tr><th>兩邊都有</th><td class="both" colspan="2">身高、體重、腰圍、血壓、血糖、血脂、肝指數 GPT、肌酸酐、尿蛋白</td></tr>
+ <tr><th>只有這邊有</th><td>尿酸、GOT、腎絲球過濾率、<em>B、C 肝篩檢</em>、醫師衛教，還能<em>一起做癌症篩檢</em></td><td>胸部 X 光、視力、辨色力、聽力、血色素、白血球、尿潛血</td></tr>
+ <tr><th>去哪裡做</th><td>健保特約診所、醫院、衛生所</td><td>勞動部認可的醫療機構</td></tr></tbody></table>`,ask:'看出來了嗎？兩種是互補，不是誰取代誰。'},
+ {k:'省',s:'會重複嗎',h:'會重複嗎？這樣安排不浪費',b:L('重複的只有基本抽血。只做公司健檢，會漏掉 <em>B、C 肝篩檢和所有癌症篩檢</em>。')+T([['同一天一起做','許多醫院可以把勞工健檢、成人健檢、癌症篩檢排在同一次，只抽一次血'],['今年公司做過了','把報告帶給家庭醫師看，只補做缺的項目'],['退休以後接上','沒有雇主了，成人健檢就是你的定期檢查'],['家管、自營、打零工','沒有勞工健檢，更要記得用成人健檢']]),ask:'只做過公司健檢的人，回去可以補做哪些？'}
+]},
+{room:'檢查室',title:'查什麼？紅字怎麼辦',color:'var(--sky)',cards:[
+ {h:'成人健檢查什麼？看到紅字怎麼辦？',b:F([['填問卷','病史、家族史、菸酒檳榔、運動'],['量身體','身高、體重、腰圍、血壓'],['抽血驗尿','血糖、血脂、肝、腎、尿酸'],['醫師解說','看結果、給建議']])+T([['不慌','一次紅字不等於生病，可能要再驗一次確認'],['不拖','帶報告回診，問清楚多久要複檢'],['不放','調整生活、定期追蹤，報告留著年年比']],3),ask:'抽血前空腹至少 8 小時，可以喝少量白開水。',askTag:'小提醒'},
+ {k:'壓',s:'血壓',h:'血壓',b:TRI(['理想：低於 120／80','130／80 以上：偏高，開始在家量','診間量到 140／90 以上：請就醫評估'],['血管長期承受高壓','中風、心臟病、腎臟病、失智的風險都上升'],['722 量血壓：連續 7 天、早晚 2 次、每次量 2 遍','少鹽，少醃漬和加工食品','每週運動 150 分鐘','不抽菸、少喝酒、睡飽']),ask:'家裡有血壓計的請舉手。上一次量是多少？',src:'資料：2022 台灣高血壓治療指引。'+REF},
+ {k:'糖',s:'血糖',h:'血糖（空腹）',b:TRI(['70–99：正常','100–125：糖尿病前期','126 以上：可能是糖尿病，要再驗確認'],['身體處理糖的能力變差','前期還有機會拉回來','久了會傷眼睛、腎臟、神經和血管'],['含糖飲料改成水或無糖茶','飯麵定量，先吃菜和肉再吃飯','飯後散步 10 到 15 分鐘','過重的人減 5–7% 體重']),ask:'今天喝了幾杯有糖的飲料？',src:REF},
+ {k:'脂',s:'血脂',h:'血脂',b:TRI(['總膽固醇：低於 200','三酸甘油酯：低於 150','好的 HDL：男 40、女 50 以上','壞的 LDL：低於 130；有糖尿病或心臟病，目標更低'],['油脂卡在血管壁，血管變窄變硬','心肌梗塞、中風的風險上升'],['少油炸、肥肉、加工肉品、糕餅','多蔬菜、全穀、豆類、魚和堅果','三酸甘油酯高：少酒、少甜','規律運動可以提高好的膽固醇']),ask:'早餐最常吃什麼？有沒有可以換掉的？',src:REF},
+ {k:'腎',s:'腎臟',h:'腎臟',b:TRI(['腎絲球過濾率 eGFR：60 以上','尿蛋白：陰性','eGFR 低於 60 超過 3 個月，就是慢性腎臟病'],['腎臟過濾能力下降','早期沒感覺，等到水腫、泡泡尿常常已經不輕','三高是最常見的原因'],['把血壓、血糖控制好','不亂吃止痛藥、來路不明的草藥和偏方','少鹽，水喝夠（醫師要你限水的除外）','定期追蹤，必要時看腎臟科']),ask:'電台或親友推薦的補腎藥，可以先問誰？',src:REF},
+ {k:'肝',s:'肝臟',h:'肝臟',b:TRI(['GOT、GPT：多數報告上限約 40','B 肝表面抗原、C 肝抗體：陰性','B、C 肝篩檢：民國 75 年以前出生到 79 歲，終身 1 次免費'],['肝臟正在發炎：脂肪肝、病毒性肝炎、酒精或藥物','肝沒有痛覺神經，壞了也不會痛'],['B、C 肝陽性：看肝膽腸胃科，C 肝有口服藥可以治癒','帶原者每半年抽血加腹部超音波','少喝酒、減重可以改善脂肪肝','保健食品、草藥先問醫師']),ask:'知道自己有沒有 B 肝、C 肝的請舉手。',src:REF},
+ {k:'腰',s:'腰圍體重',h:'體重、腰圍、尿酸',b:TRI(['BMI：18.5–24 正常；24 以上過重；27 以上肥胖','腰圍：男 90 公分、女 80 公分以上算過粗','尿酸：7 以上偏高'],['內臟脂肪多，三高跟著來','腰圍、血壓、血糖、三酸甘油酯、HDL 五項中三項異常，就是代謝症候群','尿酸高：痛風、腎結石'],['少含糖飲料、少酒，內臟和濃肉湯適量','每天走路，每週 2 次肌力訓練','長輩不要太瘦：體重莫名下降要告訴醫師','每餐有蛋白質：豆、魚、蛋、肉']),ask:'回家拿皮尺量量看：腰圍幾公分？',src:REF}
+]},
+{room:'篩檢站',title:'還有哪些該做',color:'var(--pink)',cards:[
+ {h:'除了成人健檢，還有哪些該做？',b:L('原則：<em>公費的先做滿，自費的看風險</em>。')+T([['公費癌症篩檢','大腸癌、乳癌、子宮頸癌、口腔癌、肺癌，115 年起加上胃癌'],['長者專屬','功能評估、疫苗，各縣市還有加碼項目'],['自費檢查','依家族史、生活習慣和醫師討論，不是越貴越好']],3),ask:'以前說「四癌篩檢」，現在是六項。多了哪兩項？'},
+ {k:'腸',s:'大腸癌',h:'大腸癌：糞便潛血檢查',b:T([['誰可以做','45–74 歲，每 2 年 1 次。父母、子女或兄弟姊妹得過大腸癌的人，40 歲就開始'],['怎麼做','在家採一點糞便交回院所。不用清腸，也不會痛'],['陽性怎麼辦','一定要做大腸鏡確認，不要只是再驗一次潛血'],['幫助有多大','每 2 年做一次，可以降低 35% 的大腸癌死亡率']]),ask:'領過採便管的請舉手。有交回去嗎？',src:HPA},
+ {k:'女',s:'女性篩檢',h:'女性：乳癌與子宮頸癌',b:T([['乳房 X 光攝影','40–74 歲，每 2 年 1 次'],['子宮頸抹片','25–29 歲每 3 年 1 次；30 歲以上每年可做，至少每 3 年做 1 次'],['HPV 檢測','35 歲、45 歲、65 歲當年各 1 次'],['幫助有多大','乳房攝影降低 41% 乳癌死亡率；抹片降低 70% 子宮頸癌死亡率']]),ask:'男士們：回家提醒太太、女兒、媳婦。',src:HPA},
+ {k:'肺',s:'口腔與肺',h:'口腔癌與肺癌',b:T([['口腔黏膜檢查','30 歲以上，嚼檳榔（含已戒）或吸菸的人，每 2 年 1 次'],['肺癌：有家族史','父母、子女或兄弟姊妹得過肺癌：男 45–74 歲、女 40–74 歲'],['肺癌：重度吸菸','50–74 歲，吸菸達 20 包-年，還在抽或戒菸未滿 15 年'],['肺癌怎麼做','低劑量電腦斷層，每 2 年 1 次；抽菸的人要同時接受戒菸服務']])+`<p class="note">20 包-年：每天 1 包抽 20 年，或每天 2 包抽 10 年。</p>`,ask:'家人有人得過肺癌嗎？符合資格的人要記得去做。',src:HPA},
+ {k:'胃',s:'胃與肝炎',h:'胃癌與肝炎：一生一次的機會',b:T([['胃幽門螺旋桿菌','115 年起，45–74 歲終身 1 次，採糞便檢測'],['為什麼驗它','八到九成的胃癌和這隻細菌有關'],['陽性怎麼辦','照醫囑吃藥除菌，降低胃癌風險。陽性不等於得胃癌'],['B、C 型肝炎','民國 75 年以前出生到 79 歲，終身 1 次，搭配成人健檢抽血']]),ask:'一生只有一次，做過了嗎？不確定就問院所。',src:HPA},
+ {k:'長',s:'長者專屬',h:'65 歲以上，還有這些',b:T([['長者功能評估','認知、行動、營養、視力、聽力、憂鬱六項，找出快要衰弱的地方'],['公費疫苗','流感、新冠每年打；肺炎鏈球菌疫苗依衛生所安排接種'],['縣市加碼','許多縣市的老人健檢加做胸部 X 光、心電圖等，問衛生所最清楚'],['牙齒、聽力、視力','咬不動、聽不清、看不清，人就不想出門。檢查時主動說']]),ask:'今年的流感疫苗打了嗎？'},
+ {k:'自',s:'自費怎麼選',h:'自費檢查：看風險，不看價錢',b:`<table class="cmp"><thead><tr><th style="width:55%">如果你是</th><th>可以和醫師討論</th></tr></thead><tbody>
+ <tr><td>停經後女性、70 歲以上、曾經跌倒骨折</td><td>骨質密度檢查</td></tr>
+ <tr><td>B、C 肝帶原、脂肪肝、肝指數紅字</td><td>腹部超音波</td></tr>
+ <tr><td>家人有大腸癌、自己長過瘜肉</td><td>大腸鏡</td></tr>
+ <tr><td>糖尿病、高度近視、家人有青光眼</td><td>眼底與眼壓檢查</td></tr>
+ <tr><td>三高多年、抽菸、會胸悶</td><td>心電圖、頸動脈超音波</td></tr></tbody></table>
+ <p class="warn">全身核磁共振、正子掃描、一整排腫瘤指數，不建議當成一般人的例行檢查：容易出現假警報，白擔心又多挨針。</p>`,ask:'有人被推銷過很貴的健檢套餐嗎？'}
+]},
+{room:'茶水間',title:'破解常見迷思',color:'var(--lilac)',cards:[
+ {h:'這些話，你聽過嗎？',b:'<div class="bubbles" id="bubbles"></div>',ask:'聽過的請舉手。點一句話，一個一個來破解。'},
+ {k:'謀',s:'都是陰謀',say:'我本來沒病，都是健檢才檢查出病來。這是陰謀，把沒病的人變成有病，越醫越糟。',truth:'病不是檢查變出來的。<em>檢查只是把燈打開</em>。',tiles:[['燈沒開，蟑螂也在','不檢查，血壓血糖一樣在傷血管'],['早知道，選擇多','早期多半先調整生活，不一定吃藥'],['公費項目是挑過的','按年齡和風險，選證據最充足的'],['擔心也有道理','亂做檢查會有假警報，所以公費先做滿、自費看風險']],ask:'把「檢查」換成「開燈」，再說一次看看。'},
+ {k:'好',s:'我很健康',say:'我能吃能睡，沒有不舒服，不用檢查。',truth:'最需要檢查的病，<em>偏偏都不會痛</em>。',tiles:[['三高沒感覺','很多人是中風送急診，才第一次知道自己血壓高'],['腎臟很會忍','功能掉了一大半，可能都還沒有症狀'],['癌症早期不痛','等到摸得到、會痛、會出血，常常已經不是早期']],ask:'「沒有不舒服」和「檢查正常」，是同一件事嗎？'},
+ {k:'藥',s:'怕吃藥',say:'一檢查就要吃藥，吃了就要吃一輩子，會傷腎。',truth:'紅字不等於馬上吃藥。<em>該吃而不吃，才真的傷腎</em>。',tiles:[['先調整生活','多數輕微紅字，醫師會先請你調整飲食運動，3 到 6 個月後再驗'],['藥是在保護器官','血壓、血糖控制好，才保得住腎臟、眼睛和腦'],['擔心副作用就說','可以換藥、調劑量。不要自己停藥，也不要改吃偏方']],ask:'擔心藥的副作用，應該跟誰說？'},
+ {k:'貴',s:'貴的才準',say:'免費的沒好貨，要做就做幾萬塊的才準。',truth:'貴，<em>不等於適合你</em>。',tiles:[['公費項目最划算','抽血、驗尿、量血壓，就能抓到最常見的問題'],['檢查越多，假警報越多','多出來的紅字，可能換來更多侵入性檢查'],['錢花在刀口上','先把公費做滿，再依家族史和醫師討論要加什麼']],ask:'公費的你都做滿了嗎？'},
+ {k:'過',s:'沒紅字',say:'報告都沒紅字，可以放心大吃大喝，幾年不用再驗。',truth:'健檢是<em>今天的照片</em>，不是保固書。',tiles:[['檢查有範圍','沒驗到的項目，不代表沒問題'],['身體會變','今年正常，三年後不一定，所以要定期做'],['有症狀就看醫師','不要等下一次健檢，也不要拿去年的報告安慰自己']],ask:'報告正常以後，哪些好習慣要繼續？'},
+ {k:'老',s:'年紀大了',say:'都這個年紀了，檢查出來也沒用，不要自己嚇自己。',truth:'年紀越大，檢查越有用。<em>所以 65 歲以上才會每年一次</em>。',tiles:[['防的是失能','控制好血壓血糖，可以少一次中風、少一次跌倒'],['知道了才能安排','治不治、怎麼治，都可以和醫師、家人商量，決定權在你'],['會怕很正常','找朋友一起去，比一個人猜來猜去安心']],ask:'誰可以陪你一起去？'}
+]},
+{room:'玄關',title:'今天就行動',color:'var(--butter)',cards:[
+ {h:'今天回家，就做這三件事',b:F([['查','看看自己今年可以做哪些'],['約','打電話給常去的診所或衛生所'],['帶','做完把報告帶回來，大家一起看']]),ask:'誰願意當第一個？下次上課來分享。'},
+ {k:'查',s:'查資格',h:'查一查：我可以做哪些公費檢查？',b:'<div class="elig" id="elig"></div>',ask:'請一位長輩報年齡，大家一起看結果。',src:'依 115 年公告整理；實際資格以院所查詢健保卡紀錄為準。'},
+ {k:'帶',s:'去哪裡做',h:'去哪裡做？要帶什麼？',b:T([['去哪裡','健保特約的診所、醫院、衛生所。先打電話問有沒有做成人健檢'],['帶什麼','健保卡、身分證。公司健檢或以前的報告也帶著'],['前一晚','空腹至少 8 小時，可以喝少量白開水。平常吃的藥，先問院所當天怎麼吃'],['手機也能查','健保快易通 App 的「健康存摺」，可以看能做的項目和歷年報告']]),ask:'你最常去的診所是哪一間？它有做嗎？'},
+ {k:'後',s:'做完以後',h:'做完以後，才是重點',b:T([['聽解說','一定要回去聽醫師說明，不要只拿報告回家'],['問三句','哪裡有紅字？我要做什麼？多久再驗一次？'],['留報告','每次的報告收在一起，或用健康存摺保存'],['約下次','把下一次可以做的年月，寫在月曆上']]),ask:'一起唸一次「問三句」。'},
+ {k:'約',s:'一起約定',h:'我們的約定',b:`<div class="pledge"><div>我預計在 <u>&nbsp;</u> 月，<br>和 <u>&nbsp;</u> 一起去做健康檢查。</div></div><p class="note">本簡報為衛教用途。補助資格與項目以國民健康署、勞動部最新公告為準；個人狀況請與醫師討論。</p>`,ask:'請每個人說出自己的月份。'}
+]}
+];
+CH.forEach(c=>c.cards.forEach(x=>{if(x.say){x.h='迷思：'+x.s;x.b=M(x.say,x.truth,x.tiles)}}));
+
+/* 左牆小插圖（每頁一張） */
+const DOODLE=[
+ '<rect x="40" y="36" width="120" height="110" fill="#d2e4f5"/><path d="M100 36V146M40 91H160"/><path d="M58 76q8-12 16 0q8-10 16 0M112 126q8-12 16 0q8-10 16 0"/><rect x="200" y="50" width="76" height="76" fill="#fbfaf6"/><path d="M220 82q9-13 18 0q9-13 18 0q0 15-18 28q-18-13-18-28Z" fill="#f6d3da"/>',
+ '<rect x="36" y="34" width="140" height="124" fill="#fbfaf6"/><path d="M36 62H176M71 62V158M106 62V158M141 62V158M36 94H176M36 126H176"/><path d="M118 104l8 9 16-18" stroke-width="4"/><circle cx="236" cy="120" r="30" fill="#f6e8bb"/><circle cx="252" cy="84" r="24" fill="#f6e8bb"/><path d="M226 120h20M243 84h18"/>',
+ '<rect x="40" y="26" width="110" height="146" fill="#fbfaf6"/><path d="M80 52h30M80 52v36M80 70h24M80 88h30" stroke-width="5"/><path d="M62 112h66M70 130h50M78 148h34"/><path d="M212 26V172M212 46h26M212 70h16M212 94h26M212 118h16M212 142h26"/><path d="M252 100l28-10v24Z" fill="#f6d3da"/>',
+ '<path d="M96 30q-30 34 0 62q30-28 0-62ZM82 88l-22 66M110 88l22 66" fill="#f6d3da"/><circle cx="222" cy="88" r="42" fill="#d2e4f5"/><path d="M252 120l34 40" stroke-width="7"/><path d="M204 88l12 12 22-26" stroke-width="4"/>',
+ '<path d="M36 40h130q12 0 12 12v52q0 12-12 12H92l-26 24v-24H48q-12 0-12-12Z" fill="#f6d3da"/><path d="M92 62q14-14 24 0q4 12-12 18v8M104 100v2" stroke-width="5"/><path d="M196 86h78q10 0 10 10v40q0 10-10 10h-12v20l-22-20h-34q-10 0-10-10Z" fill="#ddd7f4"/><path d="M216 112h46M216 128h30"/>',
+ '<rect x="60" y="24" width="110" height="160" fill="#f6e8bb"/><circle cx="150" cy="108" r="6" fill="#2b22d6"/><path d="M60 24l-22 14v146"/><path d="M204 104h76M256 80l26 24-26 24" stroke-width="5"/>'
+];
+
+/* ---------- 狀態與繪製 ---------- */
+const $=id=>document.getElementById(id);
+const book=$('book'),S=320;
+let ci=0,ki=0,opened=false,timer=0;
+const seen=new Set();
+const POS={3:[[-140,330],[0,330],[140,330]],4:[[-80,250],[80,250],[-80,470],[80,470]],6:[[-140,250],[0,250],[140,250],[-140,470],[0,470],[140,470]]};
+
+$('tabs').innerHTML=CH.map((c,i)=>`<button class="tab" data-c="${i}">${i+1} ${c.room}</button>`).join('');
+$('pages').innerHTML=CH.slice(1).map((_,j)=>`<div class="pw" data-j="${j}"><div class="pg"></div></div>`).join('');
+
+function setPages(){document.querySelectorAll('.pw').forEach(p=>{const j=+p.dataset.j;p.style.setProperty('--a',(j<ci?100+(ci-1-j)*8:-10-(j-ci)*8)+'deg')})}
+function renderRoom(){
+  const c=CH[ci];book.style.setProperty('--room',c.color);
+  $('wr').innerHTML=`<button class="poster" id="poster"><small>第 ${ci+1} 頁</small><b>${c.room}</b><span>${c.title}</span></button>`;
+  $('wl').innerHTML=`<svg viewBox="0 0 320 200" fill="none" stroke="#2b22d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${DOODLE[ci]}</svg>`;
+  const n=c.cards.length-1,pos=POS[n]||POS[6];
+  $('standees').innerHTML=c.cards.slice(1).map((x,i)=>{const[d,s]=pos[i];return `<button class="standee" data-k="${i+1}" style="--x:${(s+d)/2}px;--y:${(s-d)/2}px;--i:${i}" aria-label="${x.s}"><span class="sign"><b>${x.k}</b><span>${x.s}</span></span></button>`}).join('');
+  mark();
+}
+function mark(){document.querySelectorAll('.standee').forEach(b=>{const k=+b.dataset.k;b.classList.toggle('on',k===ki);b.classList.toggle('seen',k!==ki&&seen.has(ci+'-'+k))})}
+function renderSheet(){
+  const c=CH[ci],x=c.cards[ki];seen.add(ci+'-'+ki);
+  $('kick').textContent=`第 ${ci+1} 頁　${c.room}`;
+  $('pips').innerHTML=c.cards.map((_,i)=>`<button class="pip" data-k="${i}" aria-label="第 ${i+1} 張" ${i===ki?'aria-current="true"':''}></button>`).join('');
+  $('h').textContent=x.h;
+  const b=$('body');b.innerHTML=x.b;b.style.animation='none';b.offsetWidth;b.style.animation='';b.scrollTop=0;
+  $('ask').innerHTML=`<b>${x.askTag||'問問大家'}</b><span>${x.ask||''}</span>`;$('ask').hidden=!x.ask;
+  $('src').textContent=x.src||'';$('src').hidden=!x.src;
+  if($('bubbles'))$('bubbles').innerHTML=c.cards.slice(1).map((m,i)=>`<button class="bubble" data-k="${i+1}">「${m.say.length>24?m.say.slice(0,m.say.indexOf('。')>0?m.say.indexOf('。'):24)+'…':m.say}」</button>`).join('');
+  if($('elig'))elig();
+  $('room').innerHTML=`${c.room}<small>${c.title}　${ki+1} / ${c.cards.length}</small>`;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.setAttribute('aria-current',i===ci));
+  $('prev').disabled=ci===0&&ki===0;$('next').disabled=ci===CH.length-1&&ki===c.cards.length-1;
+  try{history.replaceState(null,'','#p'+(ci+1))}catch(e){}
+}
+function go(c,k){
+  if(c<0||c>=CH.length)return;k=Math.max(0,Math.min(k,CH[c].cards.length-1));
+  if(c!==ci){ci=c;ki=k;book.classList.add('folded');setPages();renderSheet();clearTimeout(timer);
+    timer=setTimeout(()=>{renderRoom();requestAnimationFrame(()=>requestAnimationFrame(()=>book.classList.remove('folded')))},520);}
+  else{ki=k;renderSheet();mark();}
+}
+function next(){const m=document.querySelector('.myth:not(.open)');if(m)return reveal();
+  if(ki<CH[ci].cards.length-1)go(ci,ki+1);else if(ci<CH.length-1)go(ci+1,0)}
+function prev(){if(ki>0)go(ci,ki-1);else if(ci>0)go(ci-1,CH[ci-1].cards.length-1)}
+function reveal(){const m=document.querySelector('.myth');if(!m)return;m.classList.add('open');m.querySelector('.truth').hidden=false}
+function openBook(){if(opened)return;opened=true;$('cover').classList.add('gone');setTimeout(()=>book.classList.remove('closed','folded'),450)}
+function fit(){const r=$('scene').getBoundingClientRect();book.style.setProperty('--k',Math.max(.4,Math.min(r.width/560,(r.height-10)/455,1.9)).toFixed(3))}
+
+/* 公費資格查詢 */
+const E={age:68,sex:'女',smoke:false,colon:false,lung:false};
+function elig(){
+  const a=E.age,f=E.sex==='女',r=[];
+  if(a>=65)r.push(['成人健檢','每年 1 次']);else if(a>=40)r.push(['成人健檢','每 3 年 1 次']);else if(a>=30)r.push(['成人健檢','每 5 年 1 次']);
+  if(a>=40&&a<=79)r.push(['B、C 肝篩檢','終身 1 次']);
+  if((a>=45&&a<=74)||(E.colon&&a>=40&&a<=44))r.push(['大腸癌糞便潛血','每 2 年 1 次']);
+  if(a>=45&&a<=74)r.push(['胃幽門桿菌檢測','終身 1 次']);
+  if(f&&a>=40&&a<=74)r.push(['乳房 X 光攝影','每 2 年 1 次']);
+  if(f&&a>=30)r.push(['子宮頸抹片','每年可做，至少 3 年 1 次']);else if(f&&a>=25)r.push(['子宮頸抹片','每 3 年 1 次']);
+  if(f&&[35,45,65].includes(a))r.push(['HPV 檢測','今年 1 次']);
+  if(E.smoke&&a>=30)r.push(['口腔黏膜檢查','每 2 年 1 次']);
+  if(E.lung&&a<=74&&a>=(f?40:45))r.push(['肺癌低劑量電腦斷層','每 2 年 1 次']);
+  else if(E.smoke&&a>=50&&a<=74)r.push(['肺癌低劑量電腦斷層','吸菸達 20 包-年者']);
+  if(a>=65){r.push(['長者功能評估','每年 1 次']);r.push(['流感、新冠、肺炎鏈球菌疫苗','問衛生所'])}
+  const chip=(k,t)=>`<button class="chip" data-e="${k}" aria-pressed="${E[k]}">${t}</button>`;
+  $('elig').innerHTML=`<div class="ctl"><h3>年齡</h3><div class="age"><button data-d="-5">−5</button><button data-d="-1">−1</button><output>${a}</output><button data-d="1">+1</button><button data-d="5">+5</button></div>
+   <h3>性別</h3><div class="seg"><button class="chip" data-s="女" aria-pressed="${f}">女</button><button class="chip" data-s="男" aria-pressed="${!f}">男</button></div>
+   <h3>有沒有這些情形</h3>${chip('smoke','抽菸或嚼檳榔（含已戒）')}${chip('colon','家人得過大腸癌')}${chip('lung','家人得過肺癌')}</div>
+   <div class="out"><h3>${a} 歲${E.sex}性，可以做 ${r.length} 項</h3><ul>${r.length?r.map(([n,t])=>`<li><b>${n}</b><span>${t}</span></li>`).join(''):'<li><b>30 歲起就有公費成人健檢</b></li>'}</ul></div>`;
+}
+
+/* ---------- 操作 ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.id==='openBtn')return openBook();
+  if(t.id==='next')return next();if(t.id==='prev')return prev();
+  if(t.id==='flip')return reveal();
+  if(t.id==='poster')return go(ci,0);
+  if(t.id==='home'){opened=false;book.classList.add('closed','folded');$('cover').classList.remove('gone');return}
+  if(t.id==='full'){const d=document;try{(d.fullscreenElement?d.exitFullscreen():d.documentElement.requestFullscreen()).catch(()=>{})}catch(_){}return}
+  if(t.dataset.c)return go(+t.dataset.c,0);
+  if(t.dataset.k)return go(ci,+t.dataset.k);
+  if(t.dataset.d){E.age=Math.max(25,Math.min(95,E.age+ +t.dataset.d));return elig()}
+  if(t.dataset.s){E.sex=t.dataset.s;return elig()}
+  if(t.dataset.e){E[t.dataset.e]=!E[t.dataset.e];return elig()}
+});
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(!opened){if(['Enter',' ','ArrowRight'].includes(e.key)){e.preventDefault();openBook()}return}
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next()}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
+  else if(e.key>='1'&&e.key<=String(CH.length))go(+e.key-1,0);
+  else if(e.key==='f'||e.key==='F')$('full').click();
+});
+addEventListener('resize',fit);
+const h0=/^#p([1-6])$/.exec(location.hash);if(h0)ci=+h0[1]-1;
+setPages();renderRoom();renderSheet();fit();
+</script>
