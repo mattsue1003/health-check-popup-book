@@ -14,7 +14,7 @@
   --fs:clamp(16px,min(1.5vw,2.75vh),30px);
 }
 html,body{height:100%}
-body{background:var(--paper);color:var(--text);font-family:var(--body);font-size:var(--fs);line-height:1.5;overflow:hidden;
+body{touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:var(--paper);color:var(--text);font-family:var(--body);font-size:var(--fs);line-height:1.5;overflow:hidden;
   background-image:radial-gradient(ellipse at 50% 40%,#f7f6f1 0%,var(--paper) 70%)}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
@@ -25,7 +25,9 @@ svg.defs{position:absolute;width:0;height:0}
 
 /* ---------- 左：立體書 ---------- */
 .stage{position:relative;min-width:0;min-height:0;display:flex;flex-direction:column}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;z-index:3}
+.tabs{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;z-index:3;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none}
 .tab{font-family:var(--hand);font-weight:700;font-size:.78em;padding:.28em .7em;border:2px solid var(--ink);border-radius:12px 14px 4px 4px/14px 12px 4px 4px;color:var(--ink);background:var(--sheet)}
 .tab[aria-current="true"]{background:var(--ink);color:#fff}
 .scene{position:relative;flex:1;min-height:0;overflow:hidden}
@@ -191,20 +193,62 @@ table.cmp{flex:1;width:100%;border-collapse:separate;border-spacing:0;border:2.5
 .zbox>table.cmp{padding:0!important}
 .zbox .stair{border-radius:14px}
 .zhint{font-family:var(--hand);color:var(--mute);font-size:clamp(14px,1.3vw,20px)}
-@media (max-width:820px){
-  :root{--fs:clamp(15px,4vw,19px)}
-  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,41fr) minmax(0,59fr);gap:8px;padding-block:8px}
-  .sheet{margin-left:0;padding:14px}
-  .tab{font-size:.7em;padding:.2em .5em}
+/* 參考資料清單 */
+.refs{list-style:none;margin:0;padding:0;flex:1;display:flex;flex-direction:column;justify-content:space-evenly;gap:.45em}
+.refs li{border:2px solid var(--ink);border-radius:14px 16px 12px 15px;background:#fff;padding:.45em .75em;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.1em .9em;align-items:center}
+.refs li:nth-child(odd){background:#fbfaff}
+.refs b{font-family:var(--hand);color:var(--ink);font-size:1.08em;line-height:1.25}
+.refs span{grid-column:1;color:var(--mute);font-size:.86em;line-height:1.4}
+.refs a{grid-column:2;grid-row:1/3;color:var(--ink);font-weight:700;font-size:.8em;border:2px solid var(--ink);border-radius:999px;padding:.3em .9em;text-decoration:none;white-space:nowrap;background:var(--sky);display:inline-flex;align-items:center;gap:.3em}
+.refs a::after{content:"↗"}
+.refs a:hover{background:var(--butter)}
+.refs a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+/* ---------- 手機直式 ---------- */
+@media (max-width:820px) and (orientation:portrait),(max-width:560px){
+  :root{--fs:clamp(16px,4.3vw,20px)}
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,33fr) minmax(0,67fr) auto;gap:6px;padding-block:6px 0}
+  .stage{display:contents}
+  .tabs{order:1;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px;padding:2px 2px 4px;margin:0 -2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;font-size:15px;min-height:40px;padding:0 .85em;scroll-snap-align:center}
+  .scene{order:2}
+  .sheet{order:3;margin-left:0;padding:14px 14px 12px;gap:8px;border-radius:16px}
+  .bar{order:4;padding:4px 0 calc(8px + env(safe-area-inset-bottom,0px))}
+  .arrow{width:68px;height:52px;border:2.5px solid var(--ink);border-radius:16px;background:var(--sheet);padding:6px 10px}
+  .arrow:disabled{opacity:.3}
+  .room{font-size:24px}
+  .room small{font-size:13px}
+  .tools{display:none}
+  .kick{font-size:15px}
+  .pips{gap:5px}
+  .pip{width:19px;height:19px;position:relative;flex:none}
+  .pip::after{content:"";position:absolute;inset:-12px -3px}
+  h1.h{font-size:clamp(24px,6.8vw,34px)}
+  .bodyx{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .bodyx.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 40px),transparent);mask-image:linear-gradient(#000 calc(100% - 40px),transparent)}
   .tri,.elig{grid-template-columns:minmax(0,1fr)}
   .tiles,.bubbles{--c:1!important;grid-template-columns:minmax(0,1fr);grid-auto-rows:auto}
   .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .say{font-size:1.3em}.pledge{font-size:1.4em}
-  .tools{display:none}
+  .stairs{min-height:13em}
+  .stair{padding:.5em .35em}
+  .stair b{font-size:1.15em;white-space:normal}
+  .stair span{font-size:1.05em;white-space:normal}
+  .say{font-size:1.25em}.pledge{font-size:1.4em}
+  .cmp th,.cmp td{padding:.45em .5em;font-size:.92em}
+  .cmp tbody th{width:4.4em}
+  .age button{min-width:44px;min-height:44px}
+  .chip{min-height:44px}
+  .refs li{grid-template-columns:minmax(0,1fr)}
+  .refs a{grid-column:1;grid-row:auto;justify-self:start;min-height:40px;margin-top:.25em}
+  .ask{font-size:.95em}
+  .zhint .k{display:none}
   .cv{width:min(88vw,calc(84vh*.78));aspect-ratio:.78;padding:8% 8% 7% 13%}
   .cv h2{font-size:clamp(34px,11vw,64px)} .cv h2 br{display:inline}
   .cv svg{height:auto;width:66%}
 }
+@media (hover:hover) and (pointer:fine){.zhint .t{display:none}}
+@media not ((hover:hover) and (pointer:fine)){.zhint .k{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation:none!important}}
 </style>
 
@@ -223,7 +267,7 @@ table.cmp{flex:1;width:100%;border-collapse:separate;border-spacing:0;border:2.5
       <path d="M196 82 q10 -14 20 0 q10 -14 20 0 q0 16 -20 30 q-20 -14 -20 -30 Z" fill="#f6d3da"/>
       <path d="M176 150 l14 -7 M212 132 l14 -7 M194 141 l14 -7" />
     </svg>
-    <p>六頁立體書，一頁一個房間。<br>點房間裡的小立牌，看一張重點卡。</p>
+    <p>七頁立體書，一頁一個房間。<br>點房間裡的小立牌，看一張重點卡。<br>手機可以左右滑動翻頁。</p>
     <span class="go">點一下，翻開</span>
   </button>
 </div>
@@ -257,7 +301,7 @@ table.cmp{flex:1;width:100%;border-collapse:separate;border-spacing:0;border:2.5
   </article>
 </div>
 
-<div class="zoom" id="zoom" hidden><div class="zbox" id="zbox"></div><div class="zhint">點一下關閉　←→ 看上一塊、下一塊</div></div>
+<div class="zoom" id="zoom" hidden><div class="zbox" id="zbox"></div><div class="zhint"><span class="k">點一下關閉　←→ 看上一塊、下一塊</span><span class="t">點一下關閉　左右滑動換一塊</span></div></div>
 
 <script>
 /* ---------- 內容 ---------- */
@@ -275,7 +319,7 @@ const CH=[
  {h:'身體沒有不舒服，為什麼還要去檢查？',b:L('健康檢查不是找麻煩，是替身體做一次<em>盤點</em>。')+T([['知道','哪裡開始走樣，心裡有數'],['提早','趁問題還小、還輕的時候處理'],['守住','不失能、不失智，自己的生活自己顧']],3),ask:'上一次抽血檢查是什麼時候？請大家說說看。'},
  {k:'靜',s:'沒感覺',h:'沒感覺，不等於沒問題',b:L('高血壓、高血糖、高血脂、腎臟病，<em>早期幾乎都沒有症狀</em>。30 多歲的人裡面：')+T([['9.7%','已經有高血壓'],['18.7%','已經有高血脂'],['2.5%','已經有高血糖'],['越老越多','所以 65 歲以上，政府讓你每年檢查一次']],2,'num'),ask:'身邊有人「突然」中風或洗腎嗎？其實多半不是突然。',src:'資料：國民健康署 2019–2023 國民營養健康調查'},
  {k:'早',s:'早處理',h:'早一步知道，少走很多路',b:L('同一個紅字，越早處理，越靠左邊就能停下來。')+F([['紅字出現','調整飲食和運動，花的是小力氣'],['放著不管','開始要靠藥物控制'],['再拖下去','中風、心臟病、洗腎'],['最後','失能，生活要靠別人照顧']]),ask:'如果可以選，你想在第幾格就停下來？'},
- {k:'能',s:'不失能',h:'目標是：老了還能自己來',b:L('國人平均有 <em>7 到 8 年</em>，是在不健康、需要人照顧的狀態中度過。')+T([['防失能','控制三高，中風和心臟病的機會就下降'],['防失智','高血壓、糖尿病、高血脂、肥胖、聽力變差，都是可以處理的失智風險'],['防衰弱','體重、腰圍、營養和肌力，檢查時一起看']],3),ask:'你最想保住的能力是什麼？走路、記性，還是自己煮飯？',src:'資料：衛福部健康平均餘命統計；Lancet 失智症預防報告 2024（14 項可改變的風險，約占 45%）'},
+ {k:'能',s:'不失能',h:'目標是：老了還能自己來',b:L('國人平均有 <em>7 到 8 年</em>，是在不健康、需要人照顧的狀態中度過。')+T([['防失能','控制三高，中風和心臟病的機會就下降'],['防失智','高血壓、糖尿病、高血脂、肥胖、聽力變差，都是可以處理的失智風險'],['防衰弱','體重、腰圍、營養和肌力，檢查時一起看']],3),ask:'你最想保住的能力是什麼？走路、記性，還是自己煮飯？',src:'資料：衛福部 113 年平均壽命 80.77 歲，不健康年數約 7–8 年；Lancet 失智症委員會 2024 報告（14 項可改變的風險，約占 45%）'},
  {k:'賺',s:'四個理由',h:'再給你四個理由',b:T([['免費','政府已經幫你付了，放著不用很可惜'],['有得比','留下每次的數字，才看得出身體往哪邊走'],['家人安心','把自己顧好，就是給孩子最大的幫忙'],['有人解說','醫師會看著報告，告訴你下一步怎麼做']]),ask:'哪一個理由最打動你？'}
 ]},
 {room:'服務台',title:'誰出錢？兩種健檢',color:'var(--butter)',cards:[
@@ -302,9 +346,9 @@ const CH=[
  {h:'除了成人健檢，還有哪些該做？',b:L('原則：<em>公費的先做滿，自費的看風險</em>。')+T([['公費癌症篩檢','大腸癌、乳癌、子宮頸癌、口腔癌、肺癌，115 年起加上胃癌'],['長者專屬','功能評估、疫苗，各縣市還有加碼項目'],['自費檢查','依家族史、生活習慣和醫師討論，不是越貴越好']],3),ask:'以前說「四癌篩檢」，現在是六項。多了哪兩項？'},
  {k:'腸',s:'大腸癌',h:'大腸癌：糞便潛血檢查',b:T([['誰可以做','45–74 歲，每 2 年 1 次。父母、子女或兄弟姊妹得過大腸癌的人，40 歲就開始'],['怎麼做','在家採一點糞便交回院所。不用清腸，也不會痛'],['陽性怎麼辦','一定要做大腸鏡確認，不要只是再驗一次潛血'],['幫助有多大','每 2 年做一次，可以降低 35% 的大腸癌死亡率']]),ask:'領過採便管的請舉手。有交回去嗎？',src:HPA},
  {k:'女',s:'女性篩檢',h:'女性：乳癌與子宮頸癌',b:T([['乳房 X 光攝影','40–74 歲，每 2 年 1 次'],['子宮頸抹片','25–29 歲每 3 年 1 次；30 歲以上每年可做，至少每 3 年做 1 次'],['HPV 檢測','35 歲、45 歲、65 歲當年各 1 次'],['幫助有多大','乳房攝影降低 41% 乳癌死亡率；抹片降低 70% 子宮頸癌死亡率']]),ask:'男士們：回家提醒太太、女兒、媳婦。',src:HPA},
- {k:'肺',s:'口腔與肺',h:'口腔癌與肺癌',b:T([['口腔黏膜檢查','30 歲以上，嚼檳榔（含已戒）或吸菸的人，每 2 年 1 次'],['肺癌：有家族史','父母、子女或兄弟姊妹得過肺癌：男 45–74 歲、女 40–74 歲'],['肺癌：重度吸菸','50–74 歲，吸菸達 20 包-年，還在抽或戒菸未滿 15 年'],['肺癌怎麼做','低劑量電腦斷層，每 2 年 1 次；抽菸的人要同時接受戒菸服務']])+`<p class="note">20 包-年：每天 1 包抽 20 年，或每天 2 包抽 10 年。</p>`,ask:'家人有人得過肺癌嗎？符合資格的人要記得去做。',src:HPA},
+ {k:'肺',s:'口腔與肺',h:'口腔癌與肺癌',b:T([['口腔黏膜檢查','30 歲以上嚼檳榔（含已戒）或吸菸；18 歲以上嚼檳榔的原住民。每 2 年 1 次'],['肺癌：有家族史','父母、子女或兄弟姊妹得過肺癌：男 45–74 歲、女 40–74 歲'],['肺癌：重度吸菸','50–74 歲，吸菸史達 20 包-年以上'],['肺癌怎麼做','低劑量電腦斷層，每 2 年 1 次；抽菸的人要同時接受戒菸服務']])+`<p class="note">20 包-年：每天 1 包抽 20 年，或每天 2 包抽 10 年。</p>`,ask:'家人有人得過肺癌嗎？符合資格的人要記得去做。',src:HPA},
  {k:'胃',s:'胃與肝炎',h:'胃癌與肝炎：一生一次的機會',b:T([['胃幽門螺旋桿菌','115 年起，45–74 歲終身 1 次，採糞便檢測'],['為什麼驗它','八到九成的胃癌和這隻細菌有關'],['陽性怎麼辦','照醫囑吃藥除菌，降低胃癌風險。陽性不等於得胃癌'],['B、C 型肝炎','民國 75 年以前出生到 79 歲，終身 1 次，搭配成人健檢抽血']]),ask:'一生只有一次，做過了嗎？不確定就問院所。',src:HPA},
- {k:'長',s:'長者專屬',h:'65 歲以上，還有這些',b:T([['長者功能評估','認知、行動、營養、視力、聽力、憂鬱六項，找出快要衰弱的地方'],['公費疫苗','流感、新冠每年打；肺炎鏈球菌疫苗依衛生所安排接種'],['縣市加碼','許多縣市的老人健檢加做胸部 X 光、心電圖等，問衛生所最清楚'],['牙齒、聽力、視力','咬不動、聽不清、看不清，人就不想出門。檢查時主動說']]),ask:'今年的流感疫苗打了嗎？'},
+ {k:'長',s:'長者專屬',h:'65 歲以上，還有這些',b:T([['長者功能評估','65 歲以上（原住民 55 歲）每年 1 次：認知、行動、營養、視力、聽力、憂鬱。也能用「長者量六力」LINE 自己測'],['公費疫苗','流感、新冠每年打；肺炎鏈球菌疫苗依衛生所安排接種'],['縣市加碼','許多縣市的老人健檢加做胸部 X 光、心電圖等，問衛生所最清楚'],['牙齒、聽力、視力','咬不動、聽不清、看不清，人就不想出門。檢查時主動說']]),ask:'今年的流感疫苗打了嗎？'},
  {k:'自',s:'自費怎麼選',h:'自費檢查：看風險，不看價錢',b:`<table class="cmp"><thead><tr><th style="width:55%">如果你是</th><th>可以和醫師討論</th></tr></thead><tbody>
  <tr><td>停經後女性、70 歲以上、曾經跌倒骨折</td><td>骨質密度檢查</td></tr>
  <tr><td>B、C 肝帶原、脂肪肝、肝指數紅字</td><td>腹部超音波</td></tr>
@@ -330,6 +374,31 @@ const CH=[
  {k:'約',s:'一起約定',h:'我們的約定',b:`<div class="pledge"><div>我預計在 <u>&nbsp;</u> 月，<br>和 <u>&nbsp;</u> 一起去做健康檢查。</div></div><p class="note">本簡報為衛教用途。補助資格與項目以國民健康署、勞動部最新公告為準；個人狀況請與醫師討論。</p>`,ask:'請每個人說出自己的月份。'}
 ]}
 ];
+const R=a=>`<ul class="refs">${a.map(([n,w,u])=>`<li><b>${n}</b><span>${w}</span>${u?`<a href="${u}" target="_blank" rel="noopener">${new URL(u).host.replace(/^www\./,'')}</a>`:''}</li>`).join('')}</ul>`;
+CH.push({room:'書房',title:'參考資料',color:'var(--sky)',cards:[
+ {h:'這本書參考了哪些資料？',b:L('點書房裡的立牌，看每一類的出處。點右邊的按鈕，可以打開原始網頁。')+T([['設計參考','立體書的樣子、操作方式、字型與無障礙規範'],['成人健檢','補助對象、次數、檢查項目、長者功能評估'],['癌症篩檢','六項公費篩檢的資格和效益'],['法規與研究','勞工健檢規定、失智風險、血壓指引']]),ask:'補助規定會調整，上課前請以國民健康署、勞動部最新公告為準。',askTag:'提醒',src:'資料查證日：2026 年 11 月 27 日'},
+ {k:'設',s:'設計參考',h:'設計參考',b:L('版面和操作參考以下作品與規範。插圖與內容由本簡報自行繪製、撰寫。')+R([
+   ['Pop-Up Room Book','Dakshie 的互動立體書作品（Recent 收錄）：藍墨水手繪線、粉彩、點開就立起來的房間、左右箭頭翻頁','https://recent.design/i/b0bab4i-pop-up-room-book'],
+   ['霞鶩文楷 LXGW WenKai TC','標題與手寫字','https://fonts.google.com/specimen/LXGW+WenKai+TC'],
+   ['Noto Sans TC','內文字型','https://fonts.google.com/noto/specimen/Noto+Sans+TC'],
+   ['WCAG 2.2 無障礙指引','文字對比、可用鍵盤操作、按鈕大小','https://www.w3.org/TR/WCAG22/'],
+   ['Apple 人機介面指南：無障礙','手機按鈕至少 44 點，單手好按','https://developer.apple.com/design/human-interface-guidelines/accessibility']])},
+ {k:'健',s:'成人健檢',h:'成人健檢與長者',b:R([
+   ['成人預防保健','國民健康署：補助對象、次數、檢查項目、B、C 肝篩檢','https://www.hpa.gov.tw/Pages/List.aspx?nodeid=189'],
+   ['成人預防保健升級，30 歲開始','衛福部新聞稿：114 年起下修至 30 歲、三高盛行率','https://www.mohw.gov.tw/cp-16-81240-1.html'],
+   ['長者量六力','國民健康署：65 歲以上六大功能評估與 LINE 自評','https://health99.hpa.gov.tw/health99/HC/D/115/SeniorAbilities'],
+   ['健康平均餘命','衛福部統計處：健康平均餘命與不健康年數','https://dep.mohw.gov.tw/DOS/cp-5082-55400-113.html']])},
+ {k:'癌',s:'癌症篩檢',h:'癌症篩檢',b:R([
+   ['114 年起擴大癌症篩檢','衛福部：大腸癌、乳癌、子宮頸癌、HPV、肺癌的資格與效益','https://www.mohw.gov.tw/cp-16-80948-1.html'],
+   ['癌症篩檢介紹','國民健康署：五癌篩檢政策','https://www.hpa.gov.tw/Pages/List.aspx?nodeid=211'],
+   ['115 年起公費胃幽門螺旋桿菌檢測','衛福部新聞稿：45–74 歲終身 1 次','https://www.mohw.gov.tw/cp-2704-85266-1.html'],
+   ['口腔黏膜檢查','國民健康署：菸檳民眾每 2 年 1 次，可降 26% 死亡風險','https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15124']])},
+ {k:'法',s:'法規與研究',h:'法規與研究',b:R([
+   ['職業安全衛生法','第 20 條：雇主負擔健康檢查費用，勞工有接受義務','https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0060001'],
+   ['勞工健康保護規則','第 17 條：一般健康檢查頻率（117 年 1 月 1 日起新制）','https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0060022'],
+   ['Lancet 失智症預防委員會 2024 報告','Livingston 等，Lancet 2024;404:572–628','https://pubmed.ncbi.nlm.nih.gov/39096926/'],
+   ['2022 台灣高血壓治療指引','台灣心臟學會、台灣高血壓學會：血壓分級與 722 居家量測','']]),src:'血糖、血脂、腎、肝、腰圍等參考值為常用臨床標準；以各檢驗單位報告為準。'}
+]});
 CH.forEach(c=>c.cards.forEach(x=>{if(x.say){x.h='迷思：'+x.s;x.b=M(x.say,x.truth,x.tiles)}}));
 
 /* 左牆小插圖（每頁一張） */
@@ -339,7 +408,8 @@ const DOODLE=[
  '<rect x="40" y="26" width="110" height="146" fill="#fbfaf6"/><path d="M80 52h30M80 52v36M80 70h24M80 88h30" stroke-width="5"/><path d="M62 112h66M70 130h50M78 148h34"/><path d="M212 26V172M212 46h26M212 70h16M212 94h26M212 118h16M212 142h26"/><path d="M252 100l28-10v24Z" fill="#f6d3da"/>',
  '<path d="M96 30q-30 34 0 62q30-28 0-62ZM82 88l-22 66M110 88l22 66" fill="#f6d3da"/><circle cx="222" cy="88" r="42" fill="#d2e4f5"/><path d="M252 120l34 40" stroke-width="7"/><path d="M204 88l12 12 22-26" stroke-width="4"/>',
  '<path d="M36 40h130q12 0 12 12v52q0 12-12 12H92l-26 24v-24H48q-12 0-12-12Z" fill="#f6d3da"/><path d="M92 62q14-14 24 0q4 12-12 18v8M104 100v2" stroke-width="5"/><path d="M196 86h78q10 0 10 10v40q0 10-10 10h-12v20l-22-20h-34q-10 0-10-10Z" fill="#ddd7f4"/><path d="M216 112h46M216 128h30"/>',
- '<rect x="60" y="24" width="110" height="160" fill="#f6e8bb"/><circle cx="150" cy="108" r="6" fill="#2b22d6"/><path d="M60 24l-22 14v146"/><path d="M204 104h76M256 80l26 24-26 24" stroke-width="5"/>'
+ '<rect x="60" y="24" width="110" height="160" fill="#f6e8bb"/><circle cx="150" cy="108" r="6" fill="#2b22d6"/><path d="M60 24l-22 14v146"/><path d="M204 104h76M256 80l26 24-26 24" stroke-width="5"/>',
+ '<rect x="36" y="34" width="156" height="136" fill="#fbfaf6"/><path d="M36 80h156M36 126h156"/><rect x="48" y="46" width="14" height="34" fill="#f6d3da"/><rect x="66" y="52" width="14" height="28" fill="#d2e4f5"/><rect x="84" y="44" width="16" height="36" fill="#f6e8bb"/><rect x="52" y="92" width="16" height="34" fill="#ddd7f4"/><rect x="72" y="96" width="12" height="30" fill="#f6d3da"/><path d="M104 126l16-32 10 5-16 32"/><rect x="52" y="138" width="40" height="32" fill="#d2e4f5"/><circle cx="244" cy="94" r="30" fill="#d2e4f5"/><path d="M266 116l26 28" stroke-width="6"/>'
 ];
 
 /* ---------- 狀態與繪製 ---------- */
@@ -375,16 +445,20 @@ function renderSheet(){
   fitBody();
   $('room').innerHTML=`${c.room}<small>${c.title}　${ki+1} / ${c.cards.length}</small>`;
   document.querySelectorAll('.tab').forEach((t,i)=>t.setAttribute('aria-current',i===ci));
+  const at=document.querySelector('.tab[aria-current="true"]'),tb=$('tabs');if(at&&tb.scrollWidth>tb.clientWidth)tb.scrollTo({left:at.offsetLeft-(tb.clientWidth-at.offsetWidth)/2,behavior:'smooth'});
   $('prev').disabled=ci===0&&ki===0;$('next').disabled=ci===CH.length-1&&ki===c.cards.length-1;
   try{history.replaceState(null,'','#p'+(ci+1))}catch(e){}
 }
 /* 字級自動放大：在不捲動的前提下，把卡片內文放到最大 */
 function over(b){if(b.scrollHeight>b.clientHeight+1)return true;
   for(const e of b.querySelectorAll('.tile,.col,.stair,td,th,.say,.out,.age,.chip,.bubble,.pledge'))if(e.scrollHeight>e.clientHeight+2||e.scrollWidth>e.clientWidth+2)return true;return false}
-function fitBody(){const b=$('body');b.style.fontSize='';if(innerWidth<=820)return;
-  const base=parseFloat(getComputedStyle($('sheet')).fontSize);let lo=base*.7,hi=base*2.6;b.style.overflow='hidden';
+const MQ=matchMedia('(max-width:820px) and (orientation:portrait),(max-width:560px)');
+function more(){const b=$('body');b.classList.toggle('more',b.scrollTop+b.clientHeight<b.scrollHeight-6)}
+function fitBody(){const b=$('body');b.style.fontSize='';const mob=MQ.matches;
+  const base=parseFloat(getComputedStyle($('sheet')).fontSize);let lo=mob?base:base*.7,hi=base*(mob?1.7:2.6);b.style.overflow='hidden';
+  if(mob){b.style.fontSize=lo+'px';if(over(b)){b.style.fontSize='';b.style.overflow='';return more()}}
   for(let i=0;i<9;i++){const m=(lo+hi)/2;b.style.fontSize=m+'px';over(b)?hi=m:lo=m}
-  b.style.fontSize=(Math.floor(lo*10)/10)+'px';b.style.overflow=''}
+  b.style.fontSize=(Math.floor(lo*10)/10)+'px';b.style.overflow='';more()}
 /* 點一塊文字放大 */
 const ZSEL='#body .tile,#body .col,#body .lead,#body .stair,#body .say,#body .warn,#body .note,#body table.cmp,#body .pledge,#ask';
 let zi=-1;
@@ -432,6 +506,7 @@ function elig(){
 
 /* ---------- 操作 ---------- */
 document.addEventListener('click',e=>{
+  if(e.target.closest('a'))return;
   if(!$('zoom').hidden)return zoomOff();
   const t=e.target.closest('button');
   if(!t){const z=e.target.closest(ZSEL);if(z&&!z.closest('.elig'))zoomTo(zlist().indexOf(z));return}
@@ -457,7 +532,13 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='f'||e.key==='F')$('full').click();
 });
 addEventListener('resize',()=>{fit();fitBody()});
+$('body').addEventListener('scroll',more,{passive:true});
+/* 手機：左右滑動翻頁；放大時左右滑動換一塊 */
+let sx=0,sy=0,st=0;
+const swipe=(el,fn)=>{el.addEventListener('touchstart',e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;st=Date.now()},{passive:true});
+  el.addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5&&Date.now()-st<900)fn(dx<0?1:-1)},{passive:true})};
+swipe($('sheet'),d=>d>0?next():prev());swipe($('scene'),d=>d>0?next():prev());swipe($('zoom'),d=>zoomTo(zi+d));
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitBody);
-const h0=/^#p([1-6])$/.exec(location.hash);if(h0)ci=+h0[1]-1;
+const h0=/^#p([1-7])$/.exec(location.hash);if(h0)ci=+h0[1]-1;
 setPages();renderRoom();renderSheet();fit();
 </script>
